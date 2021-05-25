@@ -1,25 +1,35 @@
 import express from 'express'
 import morgan from 'morgan'
+import { signIn, signOut, signUp } from './controllers/user.controllers'
 import productsRouter from './routes/products.router'
 import userRouter from './routes/user.router'
-import { signIn, signUp } from './services/auth'
+import session from 'express-session'
+import { config } from './config/dev'
+import { protect } from './utils/auth'
 
-// Settings
 const app = express()
 app.set('port', process.env.port || 3000)
 
-// Middleware
 app.use(morgan('dev'))
 app.use(express.json())
+app.use(
+  session({
+    secret: config.secrets.session,
+    resave: false,
+    saveUninitialized: false,
+  }),
+)
 
-// Routes
 app.post('/signup', signUp)
 app.post('/signin', signIn)
 
-app.use('/users', userRouter)
-app.use('/products', productsRouter)
+app.use('/api', protect)
 
-// Start server
+app.post('/signout', signOut)
+
+app.use('/api/users', userRouter)
+app.use('/api/products', productsRouter)
+
 export const start = (): void => {
   try {
     app.listen(app.get('port'), () => {

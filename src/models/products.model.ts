@@ -1,27 +1,25 @@
-import { Request, Response } from 'express'
+import { Request } from 'express'
 import { pool } from '../config/db.config'
 
-export const getProducts = (req: Request, res: Response): any => {
+export const getProductsModel = (): any => {
   pool.query('SELECT * FROM products ORDER BY id ASC', (error, results) => {
     if (error) {
       throw error
     }
-    return res.status(200).json(results.rows)
+    return results.rows
   })
 }
 
-export const getProductById = (req: Request, res: Response): any => {
-  const id = req.params.id
+export const getProductByIdModel = (id: string): any => {
   pool.query('SELECT * FROM products WHERE id = $1', [id], (error, results) => {
     if (error) {
       throw error
     }
-    return res.status(200).json(results.rows)
+    return results.rows
   })
 }
 
-export const getProductByCategory = (req: Request, res: Response): any => {
-  const category = req.params.category
+export const getProductByCategoryModel = (category: string): any => {
   pool.query(
     'SELECT * FROM products WHERE category = $1',
     [category],
@@ -29,12 +27,12 @@ export const getProductByCategory = (req: Request, res: Response): any => {
       if (error) {
         throw error
       }
-      return res.status(200).json(results.rows)
+      return results.rows
     },
   )
 }
 
-export const createProduct = (req: Request, res: Response): any => {
+export const createProductModel = (req: Request): any => {
   const { name, code, price, category, image, enabled } = req.body
 
   pool.query(
@@ -44,12 +42,12 @@ export const createProduct = (req: Request, res: Response): any => {
       if (error) {
         throw error
       }
-      res.status(201).json(`New product added`)
+      return { message: 'New product added' }
     },
   )
 }
 
-export const updateProduct = (req: Request, res: Response): any => {
+export const updateProductModel = (req: Request): any => {
   const id = parseInt(req.params.id)
   const { name, code, price, category, image, enabled } = req.body
 
@@ -60,18 +58,16 @@ export const updateProduct = (req: Request, res: Response): any => {
       if (error) {
         throw error
       }
-      res.status(200).send(`Product modified with ID: ${id}`)
+      return { message: `Product modified with ID: ${id}` }
     },
   )
 }
 
-export const deleteProduct = (req: Request, res: Response): any => {
-  const id = parseInt(req.params.id)
-
+export const deleteProductModel = (id: number): any => {
   pool.query('DELETE FROM products WHERE id = $1', [id], (error, _results) => {
     if (error) {
       throw error
     }
-    res.status(200).send(`Product deleted with ID: ${id}`)
+    return { message: `Product deleted with ID: ${id}` }
   })
 }

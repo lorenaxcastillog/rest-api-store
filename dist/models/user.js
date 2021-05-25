@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.createUser = exports.getUserById = exports.getUsers = void 0;
+exports.deleteUser = exports.createUser = exports.getUser = exports.getUsers = void 0;
 const db_config_1 = require("../config/db.config");
 const getUsers = (req, res) => {
     db_config_1.pool.query('SELECT * FROM users ORDER BY id ASC', (error, results) => {
@@ -11,23 +11,24 @@ const getUsers = (req, res) => {
     });
 };
 exports.getUsers = getUsers;
-const getUserById = (req, res) => {
-    const id = req.params.id;
-    db_config_1.pool.query('SELECT * FROM users WHERE id = $1', [id], (error, results) => {
+const getUser = (email, password) => {
+    db_config_1.pool.query('SELECT * FROM users WHERE email = $1, password = $2', [email, password], (error, results) => {
         if (error) {
             throw error;
         }
-        return res.status(200).json(results.rows);
+        return results.rows[0];
     });
 };
-exports.getUserById = getUserById;
+exports.getUser = getUser;
 const createUser = (req, res) => {
     const { name, email, password } = req.body;
-    db_config_1.pool.query(`INSERT INTO users (name, email, password) VALUES ($1, $2, $3)`, [name, email, password], (error, _results) => {
+    db_config_1.pool.query(`INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id`, [name, email, password], (error, results) => {
         if (error) {
             throw error;
         }
-        res.status(201).json(`User added`);
+        console.log('created User ======== ', results.rows[0].id); // here is finishing before continuing w signup
+        return results.rows[0].id;
+        // return res.status(201).json({ data: results.rows })
     });
 };
 exports.createUser = createUser;
@@ -41,4 +42,4 @@ const deleteUser = (req, res) => {
     });
 };
 exports.deleteUser = deleteUser;
-//# sourceMappingURL=user.controller.js.map
+//# sourceMappingURL=user.js.map
