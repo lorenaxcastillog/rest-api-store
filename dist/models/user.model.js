@@ -24,12 +24,12 @@ const createUserModel = (req, next) => __awaiter(void 0, void 0, void 0, functio
 });
 exports.createUserModel = createUserModel;
 const getUsersModel = (next) => {
-    db_config_1.pool.query('SELECT * FROM users ORDER BY id ASC', (error, results) => __awaiter(void 0, void 0, void 0, function* () {
+    db_config_1.pool.query('SELECT * FROM users ORDER BY id ASC', (error, results) => {
         if (error) {
-            return yield next(error, null);
+            return next(error, null);
         }
-        return yield next(null, results.rows);
-    }));
+        return next(null, results.rows);
+    });
 };
 exports.getUsersModel = getUsersModel;
 const getUserByEmailModel = (email, next) => {

@@ -21,11 +21,11 @@ export const createUserModel = async (
 }
 
 export const getUsersModel = (next: any): any => {
-  pool.query('SELECT * FROM users ORDER BY id ASC', async (error, results) => {
+  pool.query('SELECT * FROM users ORDER BY id ASC', (error, results) => {
     if (error) {
-      return await next(error, null)
+      return next(error, null)
     }
-    return await next(null, results.rows)
+    return next(null, results.rows)
   })
 }
 

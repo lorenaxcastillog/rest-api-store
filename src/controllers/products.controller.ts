@@ -2,41 +2,67 @@ import { Request, Response } from 'express'
 import {
   createProductModel,
   deleteProductModel,
-  getProductByCategoryModel,
+  getProductsByCategoryModel,
   getProductByIdModel,
   getProductsModel,
   updateProductModel,
 } from '../models/products.model'
 
 export const getProducts = (req: Request, res: Response): any => {
-  const result = getProductsModel()
-  return res.status(200).json({ data: result })
+  getProductsModel((error: Error, results: any) => {
+    if (error) {
+      return res.status(400).send({ message: 'Error getting products' })
+    }
+    return res.status(200).json({ data: results })
+  })
 }
 
 export const getProductById = (req: Request, res: Response): any => {
-  const id = req.params.id
-  const result = getProductByIdModel(id)
-  return res.status(200).json({ data: result })
+  const id = parseInt(req.params.id)
+  getProductByIdModel(id, (error: Error, results: any) => {
+    if (error) {
+      return res.status(400).send({ message: 'Error getting product' })
+    }
+    return res.status(200).json({ data: results })
+  })
 }
 
-export const getProductByCategory = (req: Request, res: Response): any => {
-  const category = req.params.category
-  const result = getProductByCategoryModel(category)
-  return res.status(200).json({ data: result })
+export const getProductsByCategory = (req: Request, res: Response): any => {
+  const categoryId = parseInt(req.params.id)
+  getProductsByCategoryModel(categoryId, (error: Error, results: any) => {
+    if (error) {
+      return res
+        .status(400)
+        .send({ message: 'Error getting products by category' })
+    }
+    return res.status(200).json({ data: results })
+  })
 }
 
 export const createProduct = (req: Request, res: Response): any => {
-  const result = createProductModel(req)
-  return res.status(200).json({ data: result })
+  createProductModel(req, (error: Error, results: any) => {
+    if (error) {
+      return res.status(400).send({ message: 'Error creating product' })
+    }
+    return res.status(200).json({ data: results })
+  })
 }
 
 export const updateProduct = (req: Request, res: Response): any => {
-  const result = updateProductModel(req)
-  return res.status(200).json({ data: result })
+  updateProductModel(req, (error: Error, results: any) => {
+    if (error) {
+      return res.status(400).send({ message: 'Error updating product' })
+    }
+    return res.status(200).json({ data: results })
+  })
 }
 
 export const deleteProduct = (req: Request, res: Response): any => {
   const id = parseInt(req.params.id)
-  const result = deleteProductModel(id)
-  return res.status(200).json({ data: result })
+  deleteProductModel(id, (error: Error, results: any) => {
+    if (error) {
+      return res.status(400).send({ message: 'Error updating product' })
+    }
+    return res.status(200).json({ data: results })
+  })
 }
