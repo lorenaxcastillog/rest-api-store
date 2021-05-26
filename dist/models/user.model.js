@@ -9,9 +9,40 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUserModel = exports.getUserByIdModel = exports.getUserByEmailModel = exports.getUsersModel = exports.createUserModel = void 0;
+exports.deleteUserModel = exports.getUserByIdModel = exports.getUserByEmailModel = exports.getUsersModel = exports.createUserModel = exports.deleteSessionModel = exports.searchSessionModel = exports.createSessionModel = void 0;
 const db_config_1 = require("../config/db.config");
 const auth_1 = require("../utils/auth");
+const createSessionModel = (token, next) => {
+    db_config_1.pool.query(`INSERT INTO sessions (token) VALUES ($1)`, [token], (error, _results) => {
+        if (error) {
+            return next(error, false);
+        }
+        return next(null, true);
+    });
+};
+exports.createSessionModel = createSessionModel;
+const searchSessionModel = (token, next) => {
+    db_config_1.pool.query(`SELECT * FROM sessions WHERE token = $1`, [token], (error, results) => {
+        console.log('results.rowCount ==>', results.rowCount);
+        if (error) {
+            return next(error, false);
+        }
+        if (results.rowCount > 0) {
+            return next(null, true);
+        }
+        return next(null, false);
+    });
+};
+exports.searchSessionModel = searchSessionModel;
+const deleteSessionModel = (token, next) => {
+    db_config_1.pool.query('DELETE FROM sessions WHERE token = $1', [token], (error, _results) => {
+        if (error) {
+            return next(error, false);
+        }
+        return next(null, true);
+    });
+};
+exports.deleteSessionModel = deleteSessionModel;
 const createUserModel = (req, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, email, password } = req.body;
     const hashPassword = yield auth_1.encryptPassword(password);

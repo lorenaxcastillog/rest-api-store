@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
 import { config } from '../config/dev'
 import bcrypt from 'bcryptjs'
-import { getUserByIdModel } from '../models/user.model'
+import { getUserByIdModel, searchSessionModel } from '../models/user.model'
 
 export const checkPassword = (
   password: string,
@@ -53,17 +53,25 @@ export const protect = async (req: any, res: any, next: any) => {
       .status(401)
       .json({ message: 'You are not authorized to see this' })
   }
-  const payload: any = await verifyToken(token)
 
-  getUserByIdModel(payload.id, (error: Error, results: any) => {
-    try {
-      req.user = results
-      next()
-    } catch (err) {
-      console.error(err)
+  searchSessionModel(token, async (error: Error, results: any) => {
+    if (error || !results) {
       return res
         .status(401)
         .json({ message: 'You are not authorized to see this' })
     }
+    const payload: any = await verifyToken(token)
+
+    getUserByIdModel(payload.id, (error: Error, results: any) => {
+      try {
+        req.user = results
+        next()
+      } catch (err) {
+        console.error(err)
+        return res
+          .status(401)
+          .json({ message: 'You are not authorized to see this' })
+      }
+    })
   })
 }

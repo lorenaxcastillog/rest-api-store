@@ -19,8 +19,12 @@ const signUp = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     yield user_model_1.createUserModel(req, (userId) => {
         try {
             const token = auth_1.newToken(userId);
-            req.session.token = token;
-            return res.status(201).send({ token });
+            user_model_1.createSessionModel(token, (error, _results) => {
+                if (error) {
+                    return res.status(400).send({ message: 'Error signing up' });
+                }
+                return res.status(200).json({ token });
+            });
         }
         catch (err) {
             console.error(err);
@@ -43,8 +47,12 @@ const signIn = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 return res.status(400).send({ message: 'Password does not match' });
             }
             const token = auth_1.newToken(user);
-            req.session.token = token;
-            return res.status(201).send({ token });
+            user_model_1.createSessionModel(token, (error, _results) => {
+                if (error) {
+                    return res.status(400).send({ message: 'Error signing in' });
+                }
+                return res.status(200).json({ token });
+            });
         }
         catch (err) {
             console.error(err);
@@ -54,7 +62,13 @@ const signIn = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.signIn = signIn;
 const signOut = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    delete req.session.token;
+    const token = req.headers.authorization.split('Bearer ')[1];
+    user_model_1.deleteSessionModel(token, (error, _results) => {
+        if (error) {
+            return res.status(400).send({ message: 'Error signing out' });
+        }
+        return res.status(200).send({ message: 'Signed out' });
+    });
 });
 exports.signOut = signOut;
 const getUserByEmail = (req, res) => {

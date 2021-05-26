@@ -23,7 +23,6 @@ const getProductById = (req, res) => {
 exports.getProductById = getProductById;
 const getProductsByCategory = (req, res) => {
     const categoryId = parseInt(req.params.id);
-    console.log('categoryID', categoryId);
     products_model_1.getProductsByCategoryModel(categoryId, (error, results) => {
         if (error) {
             return res

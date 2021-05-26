@@ -2,6 +2,49 @@ import { Request } from 'express'
 import { pool } from '../config/db.config'
 import { encryptPassword } from '../utils/auth'
 
+export const createSessionModel = (token: string, next: any): any => {
+  pool.query(
+    `INSERT INTO sessions (token) VALUES ($1)`,
+    [token],
+    (error, _results) => {
+      if (error) {
+        return next(error, false)
+      }
+      return next(null, true)
+    },
+  )
+}
+
+export const searchSessionModel = (token: string, next: any): any => {
+  pool.query(
+    `SELECT * FROM sessions WHERE token = $1`,
+    [token],
+    (error, results) => {
+      console.log('results.rowCount ==>', results.rowCount)
+      if (error) {
+        return next(error, false)
+      }
+      if (results.rowCount > 0) {
+        return next(null, true)
+      }
+      return next(null, false)
+    },
+  )
+}
+
+export const deleteSessionModel = (token: string, next: any): any => {
+  pool.query(
+    'DELETE FROM sessions WHERE token = $1',
+    [token],
+    (error, _results) => {
+      if (error) {
+        return next(error, false)
+      }
+      return next(null, true)
+    },
+  )
+}
+
 export const createUserModel = async (
   req: Request,
   next: any,

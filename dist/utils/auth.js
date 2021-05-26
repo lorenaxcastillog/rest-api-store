@@ -63,19 +63,26 @@ const protect = (req, res, next) => __awaiter(void 0, void 0, void 0, function* 
             .status(401)
             .json({ message: 'You are not authorized to see this' });
     }
-    const payload = yield exports.verifyToken(token);
-    user_model_1.getUserByIdModel(payload.id, (error, results) => {
-        try {
-            req.user = results;
-            next();
-        }
-        catch (err) {
-            console.error(err);
+    user_model_1.searchSessionModel(token, (error, results) => __awaiter(void 0, void 0, void 0, function* () {
+        if (error || !results) {
             return res
                 .status(401)
                 .json({ message: 'You are not authorized to see this' });
         }
-    });
+        const payload = yield exports.verifyToken(token);
+        user_model_1.getUserByIdModel(payload.id, (error, results) => {
+            try {
+                req.user = results;
+                next();
+            }
+            catch (err) {
+                console.error(err);
+                return res
+                    .status(401)
+                    .json({ message: 'You are not authorized to see this' });
+            }
+        });
+    }));
 });
 exports.protect = protect;
 //# sourceMappingURL=auth.js.map

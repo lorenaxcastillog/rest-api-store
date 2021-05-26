@@ -4,6 +4,8 @@ import {
   getUserByEmailModel,
   getUsersModel,
   deleteUserModel,
+  createSessionModel,
+  deleteSessionModel,
 } from '../models/user.model'
 import { checkPassword, newToken } from '../utils/auth'
 
@@ -14,8 +16,12 @@ export const signUp = async (req: any, res: Response): Promise<any> => {
   await createUserModel(req, (userId: string) => {
     try {
       const token = newToken(userId)
-      req.session.token = token
-      return res.status(201).send({ token })
+      createSessionModel(token, (error: Error, _results: any) => {
+        if (error) {
+          return res.status(400).send({ message: 'Error signing up' })
+        }
+        return res.status(200).json({ token })
+      })
     } catch (err) {
       console.error(err)
       return res.status(400).end()
@@ -37,8 +43,12 @@ export const signIn = async (req: any, res: Response): Promise<any> => {
         return res.status(400).send({ message: 'Password does not match' })
       }
       const token = newToken(user)
-      req.session.token = token
-      return res.status(201).send({ token })
+      createSessionModel(token, (error: Error, _results: any) => {
+        if (error) {
+          return res.status(400).send({ message: 'Error signing in' })
+        }
+        return res.status(200).json({ token })
+      })
     } catch (err) {
       console.error(err)
       return res.status(400).end()
@@ -46,8 +56,14 @@ export const signIn = async (req: any, res: Response): Promise<any> => {
   })
 }
 
-export const signOut = async (req: any, res: Response): Promise<any> => {
-  delete req.session.token
+export const signOut = async (req: Request, res: Response): Promise<any> => {
+  const token = req.headers.authorization.split('Bearer ')[1]
+  deleteSessionModel(token, (error: Error, _results: any) => {
+    if (error) {
+      return res.status(400).send({ message: 'Error signing out' })
+    }
+    return res.status(200).send({ message: 'Signed out' })
+  })
 }
 
 export const getUserByEmail = (req: Request, res: Response): void => {

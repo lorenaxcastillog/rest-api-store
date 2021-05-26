@@ -1,7 +1,7 @@
 export const config = {
   secrets: {
     jwt: 'tiny-store',
-    jwtExp: '1d',
+    jwtExp: '7d',
     session: 'tiny-store-session',
   },
 }
