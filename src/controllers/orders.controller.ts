@@ -3,6 +3,7 @@ import {
   createOrderDetailsModel,
   createOrderModel,
   validateAndGetNewProductStockModel,
+  getOrdersModel,
 } from '../models/orders.model'
 
 export const createOrder = (req: any, res: Response): any => {
@@ -31,5 +32,14 @@ export const createOrder = (req: any, res: Response): any => {
         )
       },
     )
+  })
+}
+
+export const getOrders = (req: any, res: Response): any => {
+  getOrdersModel(req, (error: Error, results: any) => {
+    if (error) {
+      return res.status(400).json({ message: error.message })
+    }
+    return res.status(200).json({ data: results })
   })
 }

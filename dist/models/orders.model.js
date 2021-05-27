@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createOrderModel = exports.createOrderDetailsModel = exports.validateAndGetNewProductStockModel = exports.updateNewProductsStock = void 0;
+exports.orderDetailsModel = exports.getOrdersModel = exports.createOrderModel = exports.createOrderDetailsModel = exports.validateAndGetNewProductStockModel = exports.updateNewProductsStock = void 0;
 const db_config_1 = require("../config/db.config");
 const updateNewProductsStock = (newProducts, next) => {
     let updateStockQuery = '';
@@ -48,7 +48,7 @@ const validateAndGetNewProductStockModel = (req, next) => {
                         message: `The stock is not enough for product: ${resProduct.name}`,
                     }, null);
                 }
-                total += resProduct.price;
+                total += resProduct.price * requestProductsStock[resProduct.id];
                 newStock.push({
                     id: resProduct.id,
                     stock: resProduct.stock - requestProductsStock[resProduct.id],
@@ -64,7 +64,7 @@ const validateAndGetNewProductStockModel = (req, next) => {
             if (error) {
                 return next(error, null);
             }
-            return next(null, Object.assign(Object.assign({}, results), { total }));
+            return next(null, Object.assign(Object.assign({}, results), { total: total.toFixed(2) }));
         });
     });
 };
@@ -96,4 +96,35 @@ const createOrderModel = (id_user, total, next) => {
     });
 };
 exports.createOrderModel = createOrderModel;
+const getOrdersModel = (req, next) => {
+    const id = req.user.id;
+    const role = req.user.role;
+    if (role === 'manager') {
+        db_config_1.pool.query(`SELECT * FROM orders`, [], (error, results) => {
+            if (error) {
+                return next(error, null);
+            }
+            return next(null, results.rows);
+        });
+    }
+    if (role === 'client') {
+        db_config_1.pool.query(`SELECT * FROM orders WHERE id_user = $1`, [id], (error, results) => {
+            if (error) {
+                return next(error, null);
+            }
+            return next(null, results.rows);
+        });
+    }
+};
+exports.getOrdersModel = getOrdersModel;
+const orderDetailsModel = (req, next) => {
+    const id = parseInt(req.body.id);
+    db_config_1.pool.query(`SELECT * FROM orders WHERE id_order = $1`, [id], (error, results) => {
+        if (error) {
+            return next(error, null);
+        }
+        return next(null, results.rows);
+    });
+};
+exports.orderDetailsModel = orderDetailsModel;
 //# sourceMappingURL=orders.model.js.map

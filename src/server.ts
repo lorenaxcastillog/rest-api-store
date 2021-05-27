@@ -1,5 +1,6 @@
 import express from 'express'
 import morgan from 'morgan'
+import { getProducts } from './controllers/products.controller'
 import { signIn, signOut, signUp } from './controllers/user.controllers'
 import ordersRouter from './routes/orders.router'
 import productsRouter from './routes/products.router'
@@ -14,6 +15,8 @@ app.use(express.json())
 
 app.post('/signup', signUp)
 app.post('/signin', signIn)
+
+app.get('/api/products', getProducts)
 
 app.use('/api', protect)
 

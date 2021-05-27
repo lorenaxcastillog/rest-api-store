@@ -64,7 +64,7 @@ export const validateAndGetNewProductStockModel = (req: Request, next: any) => {
               null,
             )
           }
-          total += resProduct.price
+          total += resProduct.price * requestProductsStock[resProduct.id]
           newStock.push({
             id: resProduct.id,
             stock: resProduct.stock - requestProductsStock[resProduct.id],
@@ -83,7 +83,7 @@ export const validateAndGetNewProductStockModel = (req: Request, next: any) => {
         if (error) {
           return next(error, null)
         }
-        return next(null, { ...results, total })
+        return next(null, { ...results, total: total.toFixed(2) })
       })
     },
   )
@@ -128,6 +128,45 @@ export const createOrderModel = (
         return next(error, null)
       }
       return next(null, results.rows[0].id)
+    },
+  )
+}
+
+export const getOrdersModel = (req: any, next: any): any => {
+  const id = req.user.id
+  const role = req.user.role
+  if (role === 'manager') {
+    pool.query(`SELECT * FROM orders`, [], (error, results) => {
+      if (error) {
+        return next(error, null)
+      }
+      return next(null, results.rows)
+    })
+  }
+  if (role === 'client') {
+    pool.query(
+      `SELECT * FROM orders WHERE id_user = $1`,
+      [id],
+      (error, results) => {
+        if (error) {
+          return next(error, null)
+        }
+        return next(null, results.rows)
+      },
+    )
+  }
+}
+
+export const orderDetailsModel = (req: any, next: any): any => {
+  const id = parseInt(req.body.id)
+  pool.query(
+    `SELECT * FROM orders WHERE id_order = $1`,
+    [id],
+    (error, results) => {
+      if (error) {
+        return next(error, null)
+      }
+      return next(null, results.rows)
     },
   )
 }

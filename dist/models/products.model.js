@@ -1,15 +1,30 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteProductModel = exports.updateProductModel = exports.createProductModel = exports.getProductsByCategoryModel = exports.getProductByIdModel = exports.getProductsModel = void 0;
+exports.deleteProductModel = exports.updateProductModel = exports.createProductModel = exports.getProductsByCategoryModel = exports.getProductByIdModel = exports.getProductsModel = exports.getTotalEnabledProductsCountModel = void 0;
 const db_config_1 = require("../config/db.config");
-const getProductsModel = (next) => {
-    db_config_1.pool.query('SELECT * FROM products ORDER BY id ASC', (error, results) => {
+const getTotalEnabledProductsCountModel = () => __awaiter(void 0, void 0, void 0, function* () {
+    const results = yield db_config_1.pool.query('SELECT COUNT(id) FROM products WHERE enabled = true');
+    return parseInt(results.rows[0].count);
+});
+exports.getTotalEnabledProductsCountModel = getTotalEnabledProductsCountModel;
+const getProductsModel = (req, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const { offset, limit } = req.body;
+    db_config_1.pool.query('SELECT * FROM products ORDER BY id ASC OFFSET $1 LIMIT $2', [offset !== null && offset !== void 0 ? offset : 0, limit !== null && limit !== void 0 ? limit : 10], (error, results) => {
         if (error) {
             return next(error, null);
         }
         return next(null, results.rows);
     });
-};
+});
 exports.getProductsModel = getProductsModel;
 const getProductByIdModel = (id, next) => {
     db_config_1.pool.query('SELECT * FROM products WHERE id = $1', [id], (error, results) => {

@@ -1,13 +1,28 @@
 import { Request } from 'express'
 import { pool } from '../config/db.config'
 
-export const getProductsModel = (next: any): any => {
-  pool.query('SELECT * FROM products ORDER BY id ASC', (error, results) => {
-    if (error) {
-      return next(error, null)
-    }
-    return next(null, results.rows)
-  })
+export const getTotalEnabledProductsCountModel = async (): Promise<any> => {
+  const results = await pool.query(
+    'SELECT COUNT(id) FROM products WHERE enabled = true',
+  )
+  return parseInt(results.rows[0].count)
+}
+
+export const getProductsModel = async (
+  req: Request,
+  next: any,
+): Promise<any> => {
+  const { offset, limit } = req.body
+  pool.query(
+    'SELECT * FROM products ORDER BY id ASC OFFSET $1 LIMIT $2',
+    [offset ?? 0, limit ?? 10],
+    (error, results) => {
+      if (error) {
+        return next(error, null)
+      }
+      return next(null, results.rows)
+    },
+  )
 }
 
 export const getProductByIdModel = (id: number, next: any): any => {

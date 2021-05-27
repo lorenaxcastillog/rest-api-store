@@ -60,9 +60,8 @@ export const protect = async (req: any, res: any, next: any) => {
         .status(401)
         .json({ message: 'You are not authorized to see this' })
     }
-    const payload: any = await verifyToken(token)
-
-    getUserByIdModel(payload.id, (error: Error, results: any) => {
+    const id: any = await verifyToken(token)
+    getUserByIdModel(id, (error: Error, results: any) => {
       try {
         req.user = results
         next()

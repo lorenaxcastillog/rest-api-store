@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createOrder = void 0;
+exports.getOrders = exports.createOrder = void 0;
 const orders_model_1 = require("../models/orders.model");
 const createOrder = (req, res) => {
     orders_model_1.validateAndGetNewProductStockModel(req, (error, results) => {
@@ -23,4 +23,13 @@ const createOrder = (req, res) => {
     });
 };
 exports.createOrder = createOrder;
+const getOrders = (req, res) => {
+    orders_model_1.getOrdersModel(req, (error, results) => {
+        if (error) {
+            return res.status(400).json({ message: error.message });
+        }
+        return res.status(200).json({ data: results });
+    });
+};
+exports.getOrders = getOrders;
 //# sourceMappingURL=orders.controller.js.map
