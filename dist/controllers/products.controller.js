@@ -54,7 +54,7 @@ exports.getProductsByCategory = getProductsByCategory;
 const createProduct = (req, res) => {
     products_model_1.createProductModel(req, (error, results) => {
         if (error) {
-            return res.status(400).send({ message: 'Error creating product' });
+            return res.status(400).send({ message: error.message });
         }
         return res.status(200).json({ data: results });
     });
@@ -63,7 +63,7 @@ exports.createProduct = createProduct;
 const updateProduct = (req, res) => {
     products_model_1.updateProductModel(req, (error, results) => {
         if (error) {
-            return res.status(400).send({ message: 'Error updating product' });
+            return res.status(400).send({ message: error.message });
         }
         return res.status(200).json({ data: results });
     });
@@ -81,10 +81,9 @@ const likeProduct = (req, res) => {
 };
 exports.likeProduct = likeProduct;
 const deleteProduct = (req, res) => {
-    const id = parseInt(req.params.id);
-    products_model_1.deleteProductModel(id, (error, results) => {
+    products_model_1.deleteProductModel(req, (error, results) => {
         if (error) {
-            return res.status(400).send({ message: 'Error updating product' });
+            return res.status(400).send({ message: error.message });
         }
         return res.status(200).json({ data: results });
     });

@@ -49,14 +49,18 @@ const getProductsByCategoryModel = (categoryId, next) => {
 exports.getProductsByCategoryModel = getProductsByCategoryModel;
 const createProductModel = (req, next) => {
     const { name, price, categoryId, image, enabled, stock } = req.body;
+    const role = req.user.role;
+    if (role === 'client') {
+        return next({ message: 'You are not authorized to do this' }, null);
+    }
     db_config_1.pool.query(`INSERT INTO products (name, price, image, enabled, stock) VALUES ($1, $2, $3, $4, $5) RETURNING id`, [name, price, image !== null && image !== void 0 ? image : null, enabled !== null && enabled !== void 0 ? enabled : true, stock], (error, results) => {
         if (error) {
-            return next(error, null);
+            return next({ message: 'Error creating product' }, null);
         }
         const productId = results.rows[0].id;
         db_config_1.pool.query(`INSERT INTO products_categories (id_product, id_category) VALUES($1, $2)`, [productId, categoryId], (error, _results) => {
             if (error) {
-                return next(error, null);
+                return next({ message: 'Error creating product' }, null);
             }
             return next(null, {
                 message: `New product added with ID: ${productId}`,
@@ -68,6 +72,10 @@ exports.createProductModel = createProductModel;
 const updateProductModel = (req, next) => {
     const id = parseInt(req.params.id);
     const { name, price, image, enabled, stock } = req.body;
+    const role = req.user.role;
+    if (role === 'client') {
+        return next({ message: 'You are not authorized to do this' }, null);
+    }
     exports.getProductByIdModel(id, (error, results) => {
         if (error) {
             return next(error, null);
@@ -88,7 +96,7 @@ const likeProductModel = (req, next) => {
     const id_user = req.user.id;
     const { id_product, likes } = req.body;
     db_config_1.pool.query(`INSERT INTO likes_users_products (id_user, id_product, likes) VALUES ($1, $2, $3) 
-      ON CONFLICT (id_user, id_product) DO UPDATE SET id_user = $1, id_product = $2, likes = $3`, [id_user, id_product, likes], (error, results) => {
+      ON CONFLICT (id_user, id_product) DO UPDATE SET id_user = $1, id_product = $2, likes = $3`, [id_user, id_product, likes], (error, _results) => {
         if (error) {
             return next(error, null);
         }
@@ -98,14 +106,19 @@ const likeProductModel = (req, next) => {
     });
 };
 exports.likeProductModel = likeProductModel;
-const deleteProductModel = (id, next) => {
+const deleteProductModel = (req, next) => {
+    const id = parseInt(req.params.id);
+    const role = req.user.role;
+    if (role === 'client') {
+        return next({ message: 'You are not authorized to do this' }, null);
+    }
     db_config_1.pool.query('DELETE FROM products_categories WHERE id_product = $1', [id], (error, _results) => {
         if (error) {
-            return next(error, null);
+            return next({ message: 'Error deleting product' }, null);
         }
         db_config_1.pool.query('DELETE FROM products WHERE id = $1', [id], (error, _results) => {
             if (error) {
-                return next(error, null);
+                return next({ message: 'Error deleting product' }, null);
             }
             return next(null, { message: `Product deleted with ID: ${id}` });
         });
