@@ -16,7 +16,10 @@ const signUp = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (!req.body.email || !req.body.password) {
         return res.status(400).send({ message: 'Email and password are required' });
     }
-    yield user_model_1.createUserModel(req, (userId) => {
+    yield user_model_1.createUserModel(req, (createUserError, userId) => {
+        if (createUserError) {
+            return res.status(400).send({ message: 'Error signing up' });
+        }
         try {
             const token = auth_1.newToken(userId);
             user_model_1.createSessionModel(token, (error, _results) => {
@@ -46,7 +49,7 @@ const signIn = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             if (!match) {
                 return res.status(400).send({ message: 'Password does not match' });
             }
-            const token = auth_1.newToken(user);
+            const token = auth_1.newToken(user.id);
             user_model_1.createSessionModel(token, (error, _results) => {
                 if (error) {
                     return res.status(400).send({ message: 'Error signing in' });

@@ -20,7 +20,6 @@ export const searchSessionModel = (token: string, next: any): any => {
     `SELECT * FROM sessions WHERE token = $1`,
     [token],
     (error, results) => {
-      console.log('results.rowCount ==>', results.rowCount)
       if (error) {
         return next(error, false)
       }
@@ -49,11 +48,11 @@ export const createUserModel = async (
   req: Request,
   next: any,
 ): Promise<any> => {
-  const { name, email, password } = req.body
+  const { name, email, password, role } = req.body
   const hashPassword = await encryptPassword(password)
   pool.query(
-    `INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id`,
-    [name, email, hashPassword],
+    `INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id`,
+    [name, email, hashPassword, role],
     (error, results) => {
       if (error) {
         return next(error, null)

@@ -13,7 +13,10 @@ export const signUp = async (req: any, res: Response): Promise<any> => {
   if (!req.body.email || !req.body.password) {
     return res.status(400).send({ message: 'Email and password are required' })
   }
-  await createUserModel(req, (userId: string) => {
+  await createUserModel(req, (createUserError: Error, userId: number) => {
+    if (createUserError) {
+      return res.status(400).send({ message: 'Error signing up' })
+    }
     try {
       const token = newToken(userId)
       createSessionModel(token, (error: Error, _results: any) => {
@@ -42,7 +45,7 @@ export const signIn = async (req: any, res: Response): Promise<any> => {
       if (!match) {
         return res.status(400).send({ message: 'Password does not match' })
       }
-      const token = newToken(user)
+      const token = newToken(user.id)
       createSessionModel(token, (error: Error, _results: any) => {
         if (error) {
           return res.status(400).send({ message: 'Error signing in' })

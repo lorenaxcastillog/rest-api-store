@@ -7,6 +7,7 @@ exports.start = void 0;
 const express_1 = __importDefault(require("express"));
 const morgan_1 = __importDefault(require("morgan"));
 const user_controllers_1 = require("./controllers/user.controllers");
+const orders_router_1 = __importDefault(require("./routes/orders.router"));
 const products_router_1 = __importDefault(require("./routes/products.router"));
 const user_router_1 = __importDefault(require("./routes/user.router"));
 const auth_1 = require("./utils/auth");
@@ -20,6 +21,7 @@ app.use('/api', auth_1.protect);
 app.post('/signout', user_controllers_1.signOut);
 app.use('/api/users', user_router_1.default);
 app.use('/api/products', products_router_1.default);
+app.use('/api/orders', orders_router_1.default);
 const start = () => {
     try {
         app.listen(app.get('port'), () => {

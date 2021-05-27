@@ -23,7 +23,6 @@ const createSessionModel = (token, next) => {
 exports.createSessionModel = createSessionModel;
 const searchSessionModel = (token, next) => {
     db_config_1.pool.query(`SELECT * FROM sessions WHERE token = $1`, [token], (error, results) => {
-        console.log('results.rowCount ==>', results.rowCount);
         if (error) {
             return next(error, false);
         }
@@ -44,9 +43,9 @@ const deleteSessionModel = (token, next) => {
 };
 exports.deleteSessionModel = deleteSessionModel;
 const createUserModel = (req, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
     const hashPassword = yield auth_1.encryptPassword(password);
-    db_config_1.pool.query(`INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id`, [name, email, hashPassword], (error, results) => {
+    db_config_1.pool.query(`INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id`, [name, email, hashPassword, role], (error, results) => {
         if (error) {
             return next(error, null);
         }

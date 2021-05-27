@@ -29,7 +29,7 @@ export const encryptPassword = (password: string): Promise<any> => {
   })
 }
 
-export const newToken = (userId: string) => {
+export const newToken = (userId: number) => {
   return jwt.sign({ id: userId }, config.secrets.jwt, {
     expiresIn: config.secrets.jwtExp,
   })
@@ -39,7 +39,7 @@ export const verifyToken = (token: any) =>
   new Promise((resolve, reject) => {
     jwt.verify(token, config.secrets.jwt, (err: any, payload: any) => {
       if (err) return reject(err)
-      resolve(payload)
+      resolve(payload.id)
     })
   })
 

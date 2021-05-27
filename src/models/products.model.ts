@@ -24,7 +24,7 @@ export const getProductsByCategoryModel = (
   next: any,
 ): any => {
   pool.query(
-    `SELECT products.id, products.name, products.code, products.price, products.image, products.enabled 
+    `SELECT products.id, products.name, products.price, products.image, products.enabled, products.stock
         FROM products JOIN products_categories 
           ON products.id = products_categories.id_product 
             WHERE products_categories.id_category = $1 AND products.enabled = true`,
@@ -39,10 +39,10 @@ export const getProductsByCategoryModel = (
 }
 
 export const createProductModel = (req: Request, next: any): any => {
-  const { name, code, price, categoryId, image, enabled } = req.body
+  const { name, price, categoryId, image, enabled, stock } = req.body
   pool.query(
-    `INSERT INTO products (name, code, price, image, enabled) VALUES ($1, $2, $3, $4, $5) RETURNING id`,
-    [name, code, price, image ?? null, enabled ?? true],
+    `INSERT INTO products (name, price, image, enabled, stock) VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+    [name, price, image ?? null, enabled ?? true, stock],
     (error, results) => {
       if (error) {
         return next(error, null)
@@ -51,7 +51,7 @@ export const createProductModel = (req: Request, next: any): any => {
       pool.query(
         `INSERT INTO products_categories (id_product, id_category) VALUES($1, $2)`,
         [productId, categoryId],
-        (error, results) => {
+        (error, _results) => {
           if (error) {
             return next(error, null)
           }
@@ -66,7 +66,7 @@ export const createProductModel = (req: Request, next: any): any => {
 
 export const updateProductModel = (req: Request, next: any): any => {
   const id = parseInt(req.params.id)
-  const { name, code, price, image, enabled } = req.body
+  const { name, price, image, enabled, stock } = req.body
 
   getProductByIdModel(id, (error: Error, results: any) => {
     if (error) {
@@ -76,8 +76,8 @@ export const updateProductModel = (req: Request, next: any): any => {
       return next(new Error(), null)
     }
     pool.query(
-      `UPDATE products SET name = $1, code = $2, price = $3, image = $4, enabled = $5 WHERE id = $6`,
-      [name, code, price, image, enabled, id],
+      `UPDATE products SET name = $1, price = $2, image = $3, enabled = $4, stock = $5 WHERE id = $6`,
+      [name, price, image, enabled, stock, id],
       (error, _results) => {
         if (error) {
           return next(error, null)

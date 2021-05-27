@@ -49,7 +49,7 @@ const verifyToken = (token) => new Promise((resolve, reject) => {
     jsonwebtoken_1.default.verify(token, dev_1.config.secrets.jwt, (err, payload) => {
         if (err)
             return reject(err);
-        resolve(payload);
+        resolve(payload.id);
     });
 });
 exports.verifyToken = verifyToken;

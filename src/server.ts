@@ -1,6 +1,7 @@
 import express from 'express'
 import morgan from 'morgan'
 import { signIn, signOut, signUp } from './controllers/user.controllers'
+import ordersRouter from './routes/orders.router'
 import productsRouter from './routes/products.router'
 import userRouter from './routes/user.router'
 import { protect } from './utils/auth'
@@ -20,6 +21,7 @@ app.post('/signout', signOut)
 
 app.use('/api/users', userRouter)
 app.use('/api/products', productsRouter)
+app.use('/api/orders', ordersRouter)
 
 export const start = (): void => {
   try {
