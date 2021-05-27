@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteProduct = exports.updateProduct = exports.createProduct = exports.getProductsByCategory = exports.getProductById = exports.getProducts = void 0;
+exports.deleteProduct = exports.likeProduct = exports.updateProduct = exports.createProduct = exports.getProductsByCategory = exports.getProductById = exports.getProducts = void 0;
 const products_model_1 = require("../models/products.model");
 const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { offset, limit } = req.body;
@@ -69,6 +69,17 @@ const updateProduct = (req, res) => {
     });
 };
 exports.updateProduct = updateProduct;
+const likeProduct = (req, res) => {
+    products_model_1.likeProductModel(req, (error, results) => {
+        if (error) {
+            return res
+                .status(400)
+                .send({ message: 'Error liking/disliking the product' });
+        }
+        return res.status(200).json(results);
+    });
+};
+exports.likeProduct = likeProduct;
 const deleteProduct = (req, res) => {
     const id = parseInt(req.params.id);
     products_model_1.deleteProductModel(id, (error, results) => {

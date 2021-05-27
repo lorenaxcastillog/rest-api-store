@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteProductModel = exports.updateProductModel = exports.createProductModel = exports.getProductsByCategoryModel = exports.getProductByIdModel = exports.getProductsModel = exports.getTotalEnabledProductsCountModel = void 0;
+exports.deleteProductModel = exports.likeProductModel = exports.updateProductModel = exports.createProductModel = exports.getProductsByCategoryModel = exports.getProductByIdModel = exports.getProductsModel = exports.getTotalEnabledProductsCountModel = void 0;
 const db_config_1 = require("../config/db.config");
 const getTotalEnabledProductsCountModel = () => __awaiter(void 0, void 0, void 0, function* () {
     const results = yield db_config_1.pool.query('SELECT COUNT(id) FROM products WHERE enabled = true');
@@ -84,6 +84,20 @@ const updateProductModel = (req, next) => {
     });
 };
 exports.updateProductModel = updateProductModel;
+const likeProductModel = (req, next) => {
+    const id_user = req.user.id;
+    const { id_product, likes } = req.body;
+    db_config_1.pool.query(`INSERT INTO likes_users_products (id_user, id_product, likes) VALUES ($1, $2, $3) 
+      ON CONFLICT (id_user, id_product) DO UPDATE SET id_user = $1, id_product = $2, likes = $3`, [id_user, id_product, likes], (error, results) => {
+        if (error) {
+            return next(error, null);
+        }
+        return next(null, {
+            data: { id_user, id_product, likes },
+        });
+    });
+};
+exports.likeProductModel = likeProductModel;
 const deleteProductModel = (id, next) => {
     db_config_1.pool.query('DELETE FROM products_categories WHERE id_product = $1', [id], (error, _results) => {
         if (error) {

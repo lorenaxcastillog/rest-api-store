@@ -7,6 +7,7 @@ import {
   getProductsModel,
   updateProductModel,
   getTotalEnabledProductsCountModel,
+  likeProductModel,
 } from '../models/products.model'
 
 export const getProducts = async (
@@ -68,6 +69,17 @@ export const updateProduct = (req: Request, res: Response): any => {
       return res.status(400).send({ message: 'Error updating product' })
     }
     return res.status(200).json({ data: results })
+  })
+}
+
+export const likeProduct = (req: any, res: Response): any => {
+  likeProductModel(req, (error: Error, results: any) => {
+    if (error) {
+      return res
+        .status(400)
+        .send({ message: 'Error liking/disliking the product' })
+    }
+    return res.status(200).json(results)
   })
 }
 

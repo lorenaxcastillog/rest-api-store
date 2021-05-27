@@ -103,6 +103,24 @@ export const updateProductModel = (req: Request, next: any): any => {
   })
 }
 
+export const likeProductModel = (req: any, next: any): any => {
+  const id_user = req.user.id
+  const { id_product, likes } = req.body
+  pool.query(
+    `INSERT INTO likes_users_products (id_user, id_product, likes) VALUES ($1, $2, $3) 
+      ON CONFLICT (id_user, id_product) DO UPDATE SET id_user = $1, id_product = $2, likes = $3`,
+    [id_user, id_product, likes],
+    (error, results) => {
+      if (error) {
+        return next(error, null)
+      }
+      return next(null, {
+        data: { id_user, id_product, likes },
+      })
+    },
+  )
+}
+
 export const deleteProductModel = (id: number, next: any): any => {
   pool.query(
     'DELETE FROM products_categories WHERE id_product = $1',
