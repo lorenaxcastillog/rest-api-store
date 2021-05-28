@@ -1,8 +1,9 @@
 import { Request } from 'express'
+import { NextFunctionCustom, RequestCustom } from '../../types/customTypes'
 import { pool } from '../config/db.config'
 import { encryptPassword } from '../utils/auth'
 
-export const createSessionModel = (token: string, next: any): any => {
+export const createSessionModel = (token: string, next: NextFunctionCustom) => {
   pool.query(
     `INSERT INTO sessions (token) VALUES ($1)`,
     [token],
@@ -15,7 +16,7 @@ export const createSessionModel = (token: string, next: any): any => {
   )
 }
 
-export const searchSessionModel = (token: string, next: any): any => {
+export const searchSessionModel = (token: string, next: NextFunctionCustom) => {
   pool.query(
     `SELECT * FROM sessions WHERE token = $1`,
     [token],
@@ -31,7 +32,7 @@ export const searchSessionModel = (token: string, next: any): any => {
   )
 }
 
-export const deleteSessionModel = (token: string, next: any): any => {
+export const deleteSessionModel = (token: string, next: NextFunctionCustom) => {
   pool.query(
     'DELETE FROM sessions WHERE token = $1',
     [token],
@@ -46,7 +47,7 @@ export const deleteSessionModel = (token: string, next: any): any => {
 
 export const createUserModel = async (
   req: Request,
-  next: any,
+  next: NextFunctionCustom,
 ): Promise<any> => {
   const { name, email, password, role } = req.body
   const hashPassword = await encryptPassword(password)
@@ -62,7 +63,11 @@ export const createUserModel = async (
   )
 }
 
-export const getUsersModel = (next: any): any => {
+export const getUsersModel = (req: RequestCustom, next: NextFunctionCustom) => {
+  const role = req.user.role
+  if (role === 'client') {
+    return next({ message: 'You are not authorized to do this' }, null)
+  }
   pool.query('SELECT * FROM users ORDER BY id ASC', (error, results) => {
     if (error) {
       return next(error, null)
@@ -71,7 +76,10 @@ export const getUsersModel = (next: any): any => {
   })
 }
 
-export const getUserByEmailModel = (email: string, next: any): any => {
+export const getUserByEmailModel = (
+  email: string,
+  next: NextFunctionCustom,
+) => {
   pool.query(
     'SELECT * FROM users WHERE email = $1',
     [email],
@@ -84,20 +92,11 @@ export const getUserByEmailModel = (email: string, next: any): any => {
   )
 }
 
-export const getUserByIdModel = (id: number, next: any): any => {
+export const getUserByIdModel = (id: number, next: NextFunctionCustom) => {
   pool.query('SELECT * FROM users WHERE id = $1', [id], (error, results) => {
     if (error) {
       return next(error, null)
     }
     return next(null, results.rows[0])
-  })
-}
-
-export const deleteUserModel = (id: number, next: any): any => {
-  pool.query('DELETE FROM users WHERE id = $1', [id], (error, _results) => {
-    if (error) {
-      return next(error, null)
-    }
-    return next(null, id)
   })
 }

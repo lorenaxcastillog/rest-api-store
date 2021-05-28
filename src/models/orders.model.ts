@@ -1,7 +1,12 @@
 import { Request } from 'express'
+import { QueryResultRow } from 'pg'
+import { NextFunctionCustom, RequestCustom } from '../../types/customTypes'
 import { pool } from '../config/db.config'
 
-export const updateNewProductsStock = (newProducts: any, next: any) => {
+export const updateNewProductsStock = (
+  newProducts: any,
+  next: NextFunctionCustom,
+) => {
   let updateStockQuery = ''
   const requestProductsIds: any = []
   for (const product of newProducts) {
@@ -22,7 +27,10 @@ export const updateNewProductsStock = (newProducts: any, next: any) => {
   )
 }
 
-export const validateAndGetNewProductStockModel = (req: Request, next: any) => {
+export const validateAndGetNewProductStockModel = (
+  req: Request,
+  next: NextFunctionCustom,
+) => {
   const requestProducts = req.body.products
   const requestProductsIds: any = []
   const requestProductsStock: any = {}
@@ -79,12 +87,15 @@ export const validateAndGetNewProductStockModel = (req: Request, next: any) => {
           null,
         )
       }
-      updateNewProductsStock(newStock, (error: Error, results: any) => {
-        if (error) {
-          return next(error, null)
-        }
-        return next(null, { ...results, total: total.toFixed(2) })
-      })
+      updateNewProductsStock(
+        newStock,
+        (error: Error, results: QueryResultRow) => {
+          if (error) {
+            return next(error, null)
+          }
+          return next(null, { ...results, total: total.toFixed(2) })
+        },
+      )
     },
   )
 }
@@ -92,8 +103,8 @@ export const validateAndGetNewProductStockModel = (req: Request, next: any) => {
 export const createOrderDetailsModel = (
   id_order: number,
   products: [any],
-  next: any,
-): any => {
+  next: NextFunctionCustom,
+) => {
   let values = ''
   for (const i in products) {
     values += ` (${id_order}, ${products[i].id}, ${products[i].quantity}, ${products[i].price})`
@@ -117,8 +128,8 @@ export const createOrderDetailsModel = (
 export const createOrderModel = (
   id_user: number,
   total: number,
-  next: any,
-): any => {
+  next: NextFunctionCustom,
+) => {
   const date = new Date()
   pool.query(
     `INSERT INTO orders (id_user, date, total) VALUES ($1, $2, $3) RETURNING id`,
@@ -132,7 +143,10 @@ export const createOrderModel = (
   )
 }
 
-export const getOrdersModel = (req: any, next: any): any => {
+export const getOrdersModel = (
+  req: RequestCustom,
+  next: NextFunctionCustom,
+) => {
   const id = req.user.id
   const role = req.user.role
   if (role === 'manager') {
@@ -157,7 +171,7 @@ export const getOrdersModel = (req: any, next: any): any => {
   }
 }
 
-export const orderDetailsModel = (req: any, next: any): any => {
+export const orderDetailsModel = (req: Request, next: NextFunctionCustom) => {
   const id = parseInt(req.body.id)
   pool.query(
     `SELECT * FROM orders WHERE id_order = $1`,

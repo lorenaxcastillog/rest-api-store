@@ -1,4 +1,6 @@
 import { Request } from 'express'
+import { QueryResultRow } from 'pg'
+import { NextFunctionCustom, RequestCustom } from '../../types/customTypes'
 import { pool } from '../config/db.config'
 
 export const getTotalEnabledProductsCountModel = async (): Promise<any> => {
@@ -10,7 +12,7 @@ export const getTotalEnabledProductsCountModel = async (): Promise<any> => {
 
 export const getProductsModel = async (
   req: Request,
-  next: any,
+  next: NextFunctionCustom,
 ): Promise<any> => {
   const { offset, limit } = req.body
   pool.query(
@@ -25,7 +27,7 @@ export const getProductsModel = async (
   )
 }
 
-export const getProductByIdModel = (id: number, next: any): any => {
+export const getProductByIdModel = (id: number, next: NextFunctionCustom) => {
   pool.query('SELECT * FROM products WHERE id = $1', [id], (error, results) => {
     if (error) {
       return next(error, null)
@@ -36,8 +38,8 @@ export const getProductByIdModel = (id: number, next: any): any => {
 
 export const getProductsByCategoryModel = (
   categoryId: number,
-  next: any,
-): any => {
+  next: NextFunctionCustom,
+) => {
   pool.query(
     `SELECT products.id, products.name, products.price, products.image, products.enabled, products.stock
         FROM products JOIN products_categories 
@@ -53,7 +55,10 @@ export const getProductsByCategoryModel = (
   )
 }
 
-export const createProductModel = (req: any, next: any): any => {
+export const createProductModel = (
+  req: RequestCustom,
+  next: NextFunctionCustom,
+) => {
   const { name, price, categoryId, image, enabled, stock } = req.body
   const role = req.user.role
   if (role === 'client') {
@@ -83,14 +88,17 @@ export const createProductModel = (req: any, next: any): any => {
   )
 }
 
-export const updateProductModel = (req: any, next: any): any => {
+export const updateProductModel = (
+  req: RequestCustom,
+  next: NextFunctionCustom,
+) => {
   const id = parseInt(req.params.id)
   const { name, price, image, enabled, stock } = req.body
   const role = req.user.role
   if (role === 'client') {
     return next({ message: 'You are not authorized to do this' }, null)
   }
-  getProductByIdModel(id, (error: Error, results: any) => {
+  getProductByIdModel(id, (error: Error, results: QueryResultRow) => {
     if (error) {
       return next(error, null)
     }
@@ -110,7 +118,10 @@ export const updateProductModel = (req: any, next: any): any => {
   })
 }
 
-export const likeProductModel = (req: any, next: any): any => {
+export const likeProductModel = (
+  req: RequestCustom,
+  next: NextFunctionCustom,
+) => {
   const id_user = req.user.id
   const { id_product, likes } = req.body
   pool.query(
@@ -128,7 +139,10 @@ export const likeProductModel = (req: any, next: any): any => {
   )
 }
 
-export const deleteProductModel = (req: any, next: any): any => {
+export const deleteProductModel = (
+  req: RequestCustom,
+  next: NextFunctionCustom,
+) => {
   const id = parseInt(req.params.id)
   const role = req.user.role
   if (role === 'client') {

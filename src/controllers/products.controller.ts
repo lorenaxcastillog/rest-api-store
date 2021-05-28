@@ -1,4 +1,6 @@
 import { Request, Response } from 'express'
+import { QueryResultRow } from 'pg'
+import { ErrorCustom, RequestCustom } from '../../types/customTypes'
 import {
   createProductModel,
   deleteProductModel,
@@ -17,7 +19,7 @@ export const getProducts = async (
   const { offset, limit } = req.body
   const total = await getTotalEnabledProductsCountModel()
 
-  await getProductsModel(req, (error: Error, results: any) => {
+  await getProductsModel(req, (error: Error, results: QueryResultRow) => {
     if (error) {
       return res.status(400).send({ message: 'Error getting products' })
     }
@@ -32,9 +34,9 @@ export const getProducts = async (
   })
 }
 
-export const getProductById = (req: Request, res: Response): any => {
+export const getProductById = (req: Request, res: Response) => {
   const id = parseInt(req.params.id)
-  getProductByIdModel(id, (error: Error, results: any) => {
+  getProductByIdModel(id, (error: Error, results: QueryResultRow) => {
     if (error) {
       return res.status(400).send({ message: 'Error getting product' })
     }
@@ -42,29 +44,23 @@ export const getProductById = (req: Request, res: Response): any => {
   })
 }
 
-export const getProductsByCategory = (req: Request, res: Response): any => {
+export const getProductsByCategory = (req: Request, res: Response) => {
   const categoryId = parseInt(req.params.id)
-  getProductsByCategoryModel(categoryId, (error: Error, results: any) => {
-    if (error) {
-      return res
-        .status(400)
-        .send({ message: 'Error getting products by category' })
-    }
-    return res.status(200).json({ data: results })
-  })
+  getProductsByCategoryModel(
+    categoryId,
+    (error: Error, results: QueryResultRow) => {
+      if (error) {
+        return res
+          .status(400)
+          .send({ message: 'Error getting products by category' })
+      }
+      return res.status(200).json({ data: results })
+    },
+  )
 }
 
-export const createProduct = (req: Request, res: Response): any => {
-  createProductModel(req, (error: any, results: any) => {
-    if (error) {
-      return res.status(400).send({ message: error.message })
-    }
-    return res.status(200).json({ data: results })
-  })
-}
-
-export const updateProduct = (req: Request, res: Response): any => {
-  updateProductModel(req, (error: Error, results: any) => {
+export const createProduct = (req: RequestCustom, res: Response) => {
+  createProductModel(req, (error: Error, results: QueryResultRow) => {
     if (error) {
       return res.status(400).send({ message: error.message })
     }
@@ -72,8 +68,17 @@ export const updateProduct = (req: Request, res: Response): any => {
   })
 }
 
-export const likeProduct = (req: any, res: Response): any => {
-  likeProductModel(req, (error: Error, results: any) => {
+export const updateProduct = (req: RequestCustom, res: Response) => {
+  updateProductModel(req, (error: ErrorCustom, results: QueryResultRow) => {
+    if (error) {
+      return res.status(400).send({ message: error.message })
+    }
+    return res.status(200).json({ data: results })
+  })
+}
+
+export const likeProduct = (req: RequestCustom, res: Response) => {
+  likeProductModel(req, (error: Error, results: QueryResultRow) => {
     if (error) {
       return res
         .status(400)
@@ -83,8 +88,8 @@ export const likeProduct = (req: any, res: Response): any => {
   })
 }
 
-export const deleteProduct = (req: Request, res: Response): any => {
-  deleteProductModel(req, (error: Error, results: any) => {
+export const deleteProduct = (req: RequestCustom, res: Response) => {
+  deleteProductModel(req, (error: Error, results: QueryResultRow) => {
     if (error) {
       return res.status(400).send({ message: error.message })
     }

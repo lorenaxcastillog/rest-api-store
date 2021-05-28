@@ -1,7 +1,10 @@
+import { NextFunction, Response } from 'express'
 import jwt from 'jsonwebtoken'
 import { config } from '../config/dev'
 import bcrypt from 'bcryptjs'
 import { getUserByIdModel, searchSessionModel } from '../models/user.model'
+import { RequestCustom } from '../../types/customTypes'
+import { QueryResultRow } from 'pg'
 
 export const checkPassword = (
   password: string,
@@ -20,7 +23,7 @@ export const checkPassword = (
 
 export const encryptPassword = (password: string): Promise<any> => {
   return new Promise((resolve, reject) => {
-    bcrypt.hash(password, 8, (err: any, hash: any) => {
+    bcrypt.hash(password, 8, (err: Error, hash: any) => {
       if (err) {
         return reject(err)
       }
@@ -37,13 +40,17 @@ export const newToken = (userId: number) => {
 
 export const verifyToken = (token: any) =>
   new Promise((resolve, reject) => {
-    jwt.verify(token, config.secrets.jwt, (err: any, payload: any) => {
+    jwt.verify(token, config.secrets.jwt, (err: Error, payload: any) => {
       if (err) return reject(err)
       resolve(payload.id)
     })
   })
 
-export const protect = async (req: any, res: any, next: any) => {
+export const protect = async (
+  req: RequestCustom,
+  res: Response,
+  next: NextFunction,
+) => {
   if (!req.headers.authorization) {
     return res.status(401).end()
   }
@@ -54,7 +61,7 @@ export const protect = async (req: any, res: any, next: any) => {
       .json({ message: 'You are not authorized to see this' })
   }
 
-  searchSessionModel(token, async (error: Error, results: any) => {
+  searchSessionModel(token, async (error: Error, results: QueryResultRow) => {
     if (error || !results) {
       return res
         .status(401)

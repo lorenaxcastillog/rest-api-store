@@ -1,15 +1,16 @@
 import { Request, Response } from 'express'
+import { QueryResultRow } from 'pg'
+import { ErrorCustom, RequestCustom, User } from '../../types/customTypes'
 import {
   createUserModel,
   getUserByEmailModel,
   getUsersModel,
-  deleteUserModel,
   createSessionModel,
   deleteSessionModel,
 } from '../models/user.model'
 import { checkPassword, newToken } from '../utils/auth'
 
-export const signUp = async (req: any, res: Response): Promise<any> => {
+export const signUp = async (req: Request, res: Response): Promise<any> => {
   if (!req.body.email || !req.body.password) {
     return res.status(400).send({ message: 'Email and password are required' })
   }
@@ -19,7 +20,7 @@ export const signUp = async (req: any, res: Response): Promise<any> => {
     }
     try {
       const token = newToken(userId)
-      createSessionModel(token, (error: Error, _results: any) => {
+      createSessionModel(token, (error: Error, _results: QueryResultRow) => {
         if (error) {
           return res.status(400).send({ message: 'Error signing up' })
         }
@@ -32,11 +33,11 @@ export const signUp = async (req: any, res: Response): Promise<any> => {
   })
 }
 
-export const signIn = async (req: any, res: Response): Promise<any> => {
+export const signIn = async (req: Request, res: Response): Promise<any> => {
   if (!req.body.email || !req.body.password) {
     return res.status(400).send({ message: 'Email and password are required' })
   }
-  getUserByEmailModel(req.body.email, async (error: Error, user: any) => {
+  getUserByEmailModel(req.body.email, async (error: Error, user: User) => {
     if (!user) {
       return res.status(400).send({ message: 'User does not exist' })
     }
@@ -46,7 +47,7 @@ export const signIn = async (req: any, res: Response): Promise<any> => {
         return res.status(400).send({ message: 'Password does not match' })
       }
       const token = newToken(user.id)
-      createSessionModel(token, (error: Error, _results: any) => {
+      createSessionModel(token, (error: Error, _results: QueryResultRow) => {
         if (error) {
           return res.status(400).send({ message: 'Error signing in' })
         }
@@ -61,7 +62,7 @@ export const signIn = async (req: any, res: Response): Promise<any> => {
 
 export const signOut = async (req: Request, res: Response): Promise<any> => {
   const token = req.headers.authorization.split('Bearer ')[1]
-  deleteSessionModel(token, (error: Error, _results: any) => {
+  deleteSessionModel(token, (error: Error, _results: QueryResultRow) => {
     if (error) {
       return res.status(400).send({ message: 'Error signing out' })
     }
@@ -69,9 +70,9 @@ export const signOut = async (req: Request, res: Response): Promise<any> => {
   })
 }
 
-export const getUserByEmail = (req: Request, res: Response): void => {
+export const getUserByEmail = (req: Request, res: Response) => {
   const email = req.body.email
-  getUserByEmailModel(email, (error: Error, results: any) => {
+  getUserByEmailModel(email, (error: Error, results: QueryResultRow) => {
     if (error) {
       return res.status(400).send({ message: 'Error getting user' })
     }
@@ -79,21 +80,11 @@ export const getUserByEmail = (req: Request, res: Response): void => {
   })
 }
 
-export const getUsers = (req: any, res: Response): any => {
-  getUsersModel((error: Error, results: any) => {
+export const getUsers = (req: RequestCustom, res: Response) => {
+  getUsersModel(req, (error: ErrorCustom, results: QueryResultRow) => {
     if (error) {
-      return res.status(400).send({ message: 'Error getting users' })
+      return res.status(400).send({ message: error.message })
     }
     return res.status(200).json({ data: results })
-  })
-}
-
-export const deleteUser = (req: Request, res: Response): any => {
-  const id = parseInt(req.params.id)
-  deleteUserModel(id, (error: Error, results: any) => {
-    if (error) {
-      return res.status(400).send({ message: 'Error deleting user' })
-    }
-    return res.status(200).send({ message: `User deleted with ID: ${results}` })
   })
 }
