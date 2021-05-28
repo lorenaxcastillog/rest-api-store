@@ -1,0 +1,15 @@
+{
+  "preset": "ts-jest",
+  "coverageDirectory": "./coverage",
+  "testMatch": ["**/?(*.)+(spec).ts"],
+  "resetMocks": true,
+  "clearMocks": true,
+  "testEnvironment": "node",
+  "moduleFileExtensions": ["ts", "js"],
+  "transform": {
+    "node_modules/variables/.+\\.(j|t)sx?$": "ts-jest",
+    "^.+\\.jsx?$": "babel-jest"
+  },
+  "transformIgnorePatterns": ["node_modules/(?!variables/.*)"],
+  "collectCoverageFrom": ["src/**/*.{ts,tsx,js,jsx}", "!src/**/*.d.ts"]
+}
