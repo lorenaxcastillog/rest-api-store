@@ -12,8 +12,14 @@ import userRouter from './routes/user.router'
 import { protect } from './utils/auth'
 import swaggerUI from 'swagger-ui-express'
 import swaggerJsDoc from 'swagger-jsdoc'
+import * as dotenv from 'dotenv'
 
 const app = express()
+
+app.set('port', process.env.port || 3000)
+
+dotenv.config({ path: '.env' })
+
 const swaggerOptions = {
   swaggerDefinition: {
     info: {
@@ -25,8 +31,6 @@ const swaggerOptions = {
   apis: ['./src/routes/*.ts', './src/server.ts', './src/schema-definitions.ts'],
 }
 const swaggerDocs = swaggerJsDoc(swaggerOptions)
-
-app.set('port', process.env.port || 3000)
 
 app.use(morgan('dev'))
 app.use(express.json())
