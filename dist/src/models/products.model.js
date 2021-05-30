@@ -17,8 +17,10 @@ const getTotalEnabledProductsCountModel = () => __awaiter(void 0, void 0, void 0
 });
 exports.getTotalEnabledProductsCountModel = getTotalEnabledProductsCountModel;
 const getProductsModel = (req, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const { offset, limit } = req.body;
-    db_config_1.pool.query('SELECT * FROM products ORDER BY id ASC OFFSET $1 LIMIT $2', [offset !== null && offset !== void 0 ? offset : 0, limit !== null && limit !== void 0 ? limit : 10], (error, results) => {
+    var _a;
+    const offset = parseInt((_a = req.query) === null || _a === void 0 ? void 0 : _a.offset) || 0;
+    const limit = parseInt(req.query.limit) || 10;
+    db_config_1.pool.query('SELECT * FROM products ORDER BY id ASC OFFSET $1 LIMIT $2', [offset, limit], (error, results) => {
         if (error) {
             return next(error, null);
         }

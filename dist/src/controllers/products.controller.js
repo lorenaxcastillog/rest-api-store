@@ -12,7 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteProduct = exports.likeProduct = exports.updateProduct = exports.createProduct = exports.getProductsByCategory = exports.getProductById = exports.getProducts = void 0;
 const products_model_1 = require("../models/products.model");
 const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { offset, limit } = req.body;
+    const offset = parseInt(req.query.offset) || 0;
+    const limit = parseInt(req.query.limit) || 10;
     const total = yield products_model_1.getTotalEnabledProductsCountModel();
     yield products_model_1.getProductsModel(req, (error, results) => {
         if (error) {
@@ -21,8 +22,8 @@ const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         return res.status(200).json({
             data: results,
             pageInfo: {
-                offset: offset !== null && offset !== void 0 ? offset : 0,
-                limit: limit !== null && limit !== void 0 ? limit : 10,
+                offset: offset,
+                limit: limit,
                 total,
             },
         });
@@ -56,7 +57,7 @@ const createProduct = (req, res) => {
         if (error) {
             return res.status(400).send({ message: error.message });
         }
-        return res.status(200).json({ data: results });
+        return res.status(200).json(results);
     });
 };
 exports.createProduct = createProduct;
@@ -65,7 +66,7 @@ const updateProduct = (req, res) => {
         if (error) {
             return res.status(400).send({ message: error.message });
         }
-        return res.status(200).json({ data: results });
+        return res.status(200).json(results);
     });
 };
 exports.updateProduct = updateProduct;
@@ -85,7 +86,7 @@ const deleteProduct = (req, res) => {
         if (error) {
             return res.status(400).send({ message: error.message });
         }
-        return res.status(200).json({ data: results });
+        return res.status(200).json(results);
     });
 };
 exports.deleteProduct = deleteProduct;

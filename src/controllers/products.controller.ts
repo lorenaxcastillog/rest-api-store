@@ -16,7 +16,8 @@ export const getProducts = async (
   req: Request,
   res: Response,
 ): Promise<any> => {
-  const { offset, limit } = req.body
+  const offset = parseInt(req.query.offset as string) || 0
+  const limit = parseInt(req.query.limit as string) || 10
   const total = await getTotalEnabledProductsCountModel()
 
   await getProductsModel(req, (error: Error, results: QueryResultRow) => {
@@ -26,8 +27,8 @@ export const getProducts = async (
     return res.status(200).json({
       data: results,
       pageInfo: {
-        offset: offset ?? 0,
-        limit: limit ?? 10,
+        offset: offset,
+        limit: limit,
         total,
       },
     })
@@ -64,7 +65,7 @@ export const createProduct = (req: RequestCustom, res: Response) => {
     if (error) {
       return res.status(400).send({ message: error.message })
     }
-    return res.status(200).json({ data: results })
+    return res.status(200).json(results)
   })
 }
 
@@ -73,7 +74,7 @@ export const updateProduct = (req: RequestCustom, res: Response) => {
     if (error) {
       return res.status(400).send({ message: error.message })
     }
-    return res.status(200).json({ data: results })
+    return res.status(200).json(results)
   })
 }
 
@@ -93,6 +94,6 @@ export const deleteProduct = (req: RequestCustom, res: Response) => {
     if (error) {
       return res.status(400).send({ message: error.message })
     }
-    return res.status(200).json({ data: results })
+    return res.status(200).json(results)
   })
 }

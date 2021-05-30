@@ -14,10 +14,11 @@ export const getProductsModel = async (
   req: Request,
   next: NextFunctionCustom,
 ): Promise<any> => {
-  const { offset, limit } = req.body
+  const offset = parseInt(req.query?.offset as string) || 0
+  const limit: number = parseInt(req.query.limit as string) || 10
   pool.query(
     'SELECT * FROM products ORDER BY id ASC OFFSET $1 LIMIT $2',
-    [offset ?? 0, limit ?? 10],
+    [offset, limit],
     (error, results) => {
       if (error) {
         return next(error, null)
